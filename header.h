@@ -9,8 +9,7 @@
 #include <math.h>
 #include <ctype.h>
 
-#define STOP_COMMAND "STOP\n"
-#define LINE_SEPARATOR "\n"
+#define LINE_SEPARATOR '\n'
 #define MAX_LINE_LENGTH 1000
 #define LINE_COUNT 50
 #define OUTPUT_LINE_LENGTH 80

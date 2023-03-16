@@ -19,68 +19,74 @@ pthread_mutex_t mutex_3 = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t full_3 = PTHREAD_COND_INITIALIZER;
 
 
-void put_buff_1(char *data, int size){
+// TODO Fix race condition
+
+void put_buff_1(struct dataBuffer *buff){
     pthread_mutex_lock(&mutex_1);
-    strcpy(buffer_1.data, data);
-    buffer_1.size = size;
+    strcpy(buffer_1.data, buff->data);
+    buffer_1.size = buff->size;
     pthread_cond_signal(&full_1);
     pthread_mutex_unlock(&mutex_1);
 }
 
-void put_buff_2(char *data, int size){
+void put_buff_2(struct dataBuffer *buff){
     pthread_mutex_lock(&mutex_2);
-    strcpy(buffer_2.data, data);
-    buffer_2.size = size;
+    strcpy(buffer_2.data, buff->data);
+    buffer_2.size = buff->size;
     pthread_cond_signal(&full_2);
     pthread_mutex_unlock(&mutex_2);
 }
 
-void put_buff_3(char *data, int size){
+void put_buff_3(struct dataBuffer *buff){
     pthread_mutex_lock(&mutex_3);
-    strcpy(buffer_3.data, data);
-    buffer_3.size = size;
+    strcpy(buffer_3.data, buff->data);
+    buffer_3.size = buff->size;
     pthread_cond_signal(&full_3);
     pthread_mutex_unlock(&mutex_3);
 }
 
-void get_buff_1(char *data, int *size){
+void get_buff_1(struct dataBuffer *buff){
     pthread_mutex_lock(&mutex_1);
     while (buffer_1.size == 0){
         pthread_cond_wait(&full_1, &mutex_1);
     }
-    strcpy(data, buffer_1.data);
-    *size = buffer_1.size;
+    strcpy(buff->data, buffer_1.data);
+    buff->size = buffer_1.size;
     pthread_mutex_unlock(&mutex_1);
 }
 
-void get_buff_2(char *data, int *size){
+void get_buff_2(struct dataBuffer *buff){
     pthread_mutex_lock(&mutex_2);
+
     while (buffer_2.size == 0){
         pthread_cond_wait(&full_2, &mutex_2);
     }
-    strcpy(data, buffer_2.data);
-    *size = buffer_2.size;
+
+    strcpy(buff->data, buffer_2.data);
+    buff->size = buffer_2.size;
     pthread_mutex_unlock(&mutex_2);
 }
 
-void get_buff_3(char *data, int *size){
+void get_buff_3(struct dataBuffer *buff){
     pthread_mutex_lock(&mutex_3);
+
     while (buffer_1.size == 0){
         pthread_cond_wait(&full_3, &mutex_3);
     }
-    strcpy(data, buffer_3.data);
-    *size = buffer_3.size;
+
+    strcpy(buff->data, buffer_3.data);
+    buff->size = buffer_3.size;
     pthread_mutex_unlock(&mutex_3);
 }
 
 void get_user_input(struct dataBuffer *buff){
         for(int i = 0; i < 1000; i++){
             buff->data[i] = fgetc(stdin);
-            if(buff->data[i] == EOF || (buff->data[i] == '\n' && buff->data[i-1] == 'P' && buff->data[i-2] == 'O' && buff->data[i-3] == 'T' && buff->data[i-4] == 'S')){
-                for(int j = i-4; j < i; j++){
+            if(buff->data[i] == EOF || (buff->data[i] == LINE_SEPARATOR && buff->data[i-1] == 'P' && buff->data[i-2] == 'O' && buff->data[i-3] == 'T' && buff->data[i-4] == 'S' && buff->data[i-5] == LINE_SEPARATOR)){
+                for(int j = i-5; j < i; j++){
                     buff->data[j] = '\0';
                 }
-                buff->size = i - 4;
+                buff->size = i - 5;
                 break;
             }
     }
@@ -90,7 +96,7 @@ void *input_thread(void *arg) {
     struct dataBuffer buffer;
     buffer.size = 0;
     get_user_input(&buffer);
-    put_buff_1(buffer.data, buffer.size);
+    put_buff_1(&buffer);
 
     return NULL;
 }
@@ -98,7 +104,7 @@ void *input_thread(void *arg) {
 void *separator_thread(void *arg) {
     struct dataBuffer buffer;
     buffer.size = 0;
-    get_buff_1(buffer.data, &buffer.size);
+    get_buff_1(&buffer);
 
     for(int i = 0; i < buffer.size; i++){
         if(buffer.data[i] == '\n'){
@@ -106,14 +112,14 @@ void *separator_thread(void *arg) {
         }
     }
 
-    put_buff_2(buffer.data, buffer.size);
+    put_buff_2(&buffer);
     return NULL;
 }
 
 void *plus_thread(void *arg) {
     struct dataBuffer buffer;
     buffer.size = 0;
-    get_buff_2(buffer.data, &buffer.size);
+    get_buff_2(&buffer);
 
     for(int i = 0; i < buffer.size; i++){
         if(buffer.data[i] == '+' && buffer.data[i+1] == '+'){
@@ -125,8 +131,7 @@ void *plus_thread(void *arg) {
         }
     }
 
-    
-    put_buff_3(buffer.data, buffer.size);
+    put_buff_3(&buffer);
     return NULL;
 }
 
@@ -134,7 +139,8 @@ void *output_thread(void *arg) {
     struct dataBuffer buffer;
     buffer.size = 0;
     char *temp = calloc(80, sizeof(char));
-    get_buff_3(buffer.data, &buffer.size);
+    get_buff_3(&buffer);
+
     for(int i = 0; i < buffer.size; i++){
         if(i % 80 == 0 && i != 0){
             printf("%s", temp);
@@ -143,6 +149,7 @@ void *output_thread(void *arg) {
         }
         temp[i % 80] = buffer.data[i];
     }
+
     free(temp);
 }
 
