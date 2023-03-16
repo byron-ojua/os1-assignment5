@@ -20,19 +20,16 @@ struct dataBuffer{
     int size;
 };
 
-void put_buff_1(char *data, int size);
-void put_buff_2(char *data, int size);
-void put_buff_3(char *data, int size);
-void get_buff_1(char *data, int *size);
-void get_buff_2(char *data, int *size);
-void get_buff_3(char *data, int *size);
+void put_buff_1(struct dataBuffer *buff);
+void put_buff_2(struct dataBuffer *buff);
+void put_buff_3(struct dataBuffer *buff);
+void get_buff_1(struct dataBuffer *buff);
+void get_buff_2(struct dataBuffer *buff);
+void get_buff_3(struct dataBuffer *buff);
 void get_user_input(struct dataBuffer *buff);
 void *input_thread(void *arg);
-// void separate_input();
 void *separator_thread(void *arg);
-// void plus_check_input();
 void *plus_thread(void *arg);
-// void write_output();
 void *output_thread(void *arg);
 
 #endif
