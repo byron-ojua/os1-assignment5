@@ -1,5 +1,15 @@
 all:
-	gcc --std=gnu99 -o line_processor main.c util.c
+	gcc --std=gnu99 -pthread -lm -o line_processor main.c dbgmsg.c
+
+example:
+	clear
+	gcc --std=gnu99 -pthread -lm -o example example.c dbgmsg.c
+	./example
+
+gpt:
+	clear
+	gcc --std=gnu99 -pthread -lm -o gpt gpt.c dbgmsg.c
+	./gpt
 
 clean: 
 	rm line_processor
