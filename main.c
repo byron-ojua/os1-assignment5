@@ -17,24 +17,16 @@ pthread_mutex_t mutex_3 = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t full_3 = PTHREAD_COND_INITIALIZER;
 
 
-// TODO Fix race condition
-
 /**
  * @brief Copies input data from temp buffer to buffer_1
  * 
  * @param buff buffer to copy from
  */
 void put_buff_1(struct dataBuffer *buff){
-    fprintf(stderr, "put_buff_1: Locking mutex_1\n");
-    fflush(stderr);
     pthread_mutex_lock(&mutex_1);
     strcpy(buffer_1.data, buff->data);
     buffer_1.size = buff->size;
-    fprintf(stderr, "put_buff_1: Signal full_1\n");
-    fflush(stderr);
     pthread_cond_signal(&full_1);
-    fprintf(stderr, "put_buff_1: Unlocking mutex_1\n");
-    fflush(stderr);
     pthread_mutex_unlock(&mutex_1);
 }
 
@@ -44,16 +36,10 @@ void put_buff_1(struct dataBuffer *buff){
  * @param buff buffer to copy from
  */
 void put_buff_2(struct dataBuffer *buff){
-    fprintf(stderr, "put_buff_2: Locking mutex_2\n");
-    fflush(stderr);
     pthread_mutex_lock(&mutex_2);
     strcpy(buffer_2.data, buff->data);
     buffer_2.size = buff->size;
-    fprintf(stderr, "put_buff_2: Signal full_2\n");
-    fflush(stderr);
     pthread_cond_signal(&full_2);
-    fprintf(stderr, "put_buff_2: Unlocking mutex_2\n");
-    fflush(stderr);
     pthread_mutex_unlock(&mutex_2);
 }
 
@@ -63,16 +49,10 @@ void put_buff_2(struct dataBuffer *buff){
  * @param buff buffer to copy from
  */
 void put_buff_3(struct dataBuffer *buff){
-    fprintf(stderr, "put_buff_3: Locking mutex_3\n");
-    fflush(stderr);
     pthread_mutex_lock(&mutex_3);
     strcpy(buffer_3.data, buff->data);
     buffer_3.size = buff->size;
-    fprintf(stderr, "put_buff_3: Signal full_3\n");
-    fflush(stderr);
     pthread_cond_signal(&full_3);
-    fprintf(stderr, "put_buff_3: Unlocking mutex_3\n");
-    fflush(stderr);
     pthread_mutex_unlock(&mutex_3);
 }
 
@@ -82,22 +62,14 @@ void put_buff_3(struct dataBuffer *buff){
  * @param buff buffer to copy into
  */
 void get_buff_1(struct dataBuffer *buff){
-    fprintf(stderr, "get_buff_1: Locking mutex_1\n");
-    fflush(stderr);
     pthread_mutex_lock(&mutex_1);
-    fprintf(stderr, "get_buff_1: Entering cond_wait\n");
-    fflush(stderr);
 
     while (buffer_1.size == 0){
         pthread_cond_wait(&full_1, &mutex_1);
     }
-    fprintf(stderr, "get_buff_1: Leaving cond_wait\n");
-    fflush(stderr);
 
     strcpy(buff->data, buffer_1.data);
     buff->size = buffer_1.size;
-    fprintf(stderr, "get_buff_1: Unlocking mutex_1\n");
-    fflush(stderr);
     pthread_mutex_unlock(&mutex_1);
 }
 
@@ -107,22 +79,14 @@ void get_buff_1(struct dataBuffer *buff){
  * @param buff buffer to copy into
  */
 void get_buff_2(struct dataBuffer *buff){
-    fprintf(stderr, "get_buff_2: Locking mutex_2\n");
-    fflush(stderr);
     pthread_mutex_lock(&mutex_2);
 
-    fprintf(stderr, "get_buff_2: Entering cond_wait\n");
-    fflush(stderr);
     while (buffer_2.size == 0){
         pthread_cond_wait(&full_2, &mutex_2);
     }
-    fprintf(stderr, "get_buff_2: Leaving cond_wait\n");
-    fflush(stderr);
 
     strcpy(buff->data, buffer_2.data);
     buff->size = buffer_2.size;
-    fprintf(stderr, "get_buff_2: Unlocking mutex_2\n");
-    fflush(stderr);
     pthread_mutex_unlock(&mutex_2);
 }
 
@@ -132,23 +96,14 @@ void get_buff_2(struct dataBuffer *buff){
  * @param buff buffer to copy into
  */
 void get_buff_3(struct dataBuffer *buff){
-    fprintf(stderr, "get_buff_3: Locking mutex_3\n");
-    fflush(stderr);
     pthread_mutex_lock(&mutex_3);
 
-    fprintf(stderr, "get_buff_3: Entering cond_wait\n");
-    fflush(stderr);
-    while (buffer_1.size == 0){
+    while (buffer_3.size == 0){
         pthread_cond_wait(&full_3, &mutex_3);
     }
-    fprintf(stderr, "get_buff_3: Leaving cond_wait\n");
-    fflush(stderr);
 
     strcpy(buff->data, buffer_3.data);
     buff->size = buffer_3.size;
-
-    fprintf(stderr, "get_buff_3: Unlocking mutex_3\n");
-    fflush(stderr);
     pthread_mutex_unlock(&mutex_3);
 }
 
